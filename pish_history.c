@@ -32,6 +32,21 @@ void add_history(const struct pish_arg *arg)
      * - write out the command stored in `arg`; argv values are separated
      *   by a space.
      */
+     // open (and create if needed) history file at pish_history_path in append mode
+     FILE *file = fopen(pish_history_path,"a");
+     if(file==NULL){
+         perror("open");
+	 return;
+     }
+     //traverse the argv, write out the command stored in `arg`; argv values are separated by a space.
+     for(int i=0; i < arg->argc; i++){
+         fprintf(file, "%s ",arg->argv[i]);
+     }
+     // \n afeter each command
+     fprintf(file, "\n");
+
+     //close file
+     fclose(file);
 }
 
 void print_history()
@@ -42,4 +57,19 @@ void print_history()
     }
 
     /* TODO: read history file and print with index */
-}
+    FILE *file = fopen(pish_history_path,"r");
+    if(file==NULL){
+        perror("open");
+	return;
+    }
+    char line[1024];
+    int count = 1; //start from line one
+		
+    //fgets each line and print out
+    while(fgets(line,sizeof(line),file)){
+        printf("%d %s", count++, line);
+    }
+
+    //close file
+    fclose(file);
+}  

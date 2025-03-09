@@ -1,8 +1,7 @@
-#ifndef __PISH_HISTORY_H__
-#define __PISH_HISTORY_H__
+#ifndef __PISH_H__
+#define __PISH_H__
 
 #define MAX_ARGC 64
-
 /*
  * Each input command will be parsed into this struct.
  * E.g. 
@@ -24,8 +23,15 @@ struct pish_arg {
     char *argv[MAX_ARGC];   /* NULL-terminated array of argument strings */
 };
 
+void handle_exit(struct pish_arg *arg);
+void handle_cd(struct pish_arg *arg);
+void handle_history(struct pish_arg *arg);
+void execute_external_command(struct pish_arg *arg);
+
 void add_history(const struct pish_arg *arg);
 
 void print_history();
 
-#endif // __PISH_HISTORY_H__
+void usage_error(void);
+
+#endif // __PISH_H__
