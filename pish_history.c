@@ -40,10 +40,10 @@ void add_history(const struct pish_arg *arg)
      }
      //traverse the argv, write out the command stored in `arg`; argv values are separated by a space.
      for(int i=0; i < arg->argc; i++){
-         fprintf(file, "%s ",arg->argv[i]);
-         if(i< arg->argc -1){
+         if(i>0){
 	     fprintf(file," ");
 	 }
+	 fprintf(file, "%s ",arg->argv[i]);
      }
      // \n afeter each command
      fprintf(file, "\n");
