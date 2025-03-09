@@ -9,7 +9,15 @@
 
 #include "pish.h"
 
+//Batch mode flag. If set to 0, the shell reads from stdin. If set to 1,
+//     * the shell reads from a file from argv[1].
+static int script_mode = 0;
+
 void handle_exit(struct pish_arg *arg){
+    if(arg->argc >1 ){
+        usage_error();
+	return;
+    }
      exit(EXIT_SUCCESS);
 }
 
@@ -24,28 +32,28 @@ void handle_cd(struct pish_arg *arg){
 }
 
 void handle_history(struct pish_arg *arg){
+     if(arg->argc>1){
+         usage_error();
+	 return;
+     }
      print_history();
 }
 
 void execute_external_command(struct pish_arg *arg){
      pid_t pid = fork();
-     if(pid == -1){
+     if(pid < 0){
          perror("fork");
 	 return;
      }
-     if( pid == 0){
+     else if( pid == 0){
          execvp(arg->argv[0],arg->argv);
 	 perror("pish");
 	 exit(EXIT_FAILURE);
      }
+     else{
      wait(NULL); //wait until the child finish the tasks
+     }
 }
-
-/*
- * Batch mode flag. If set to 0, the shell reads from stdin. If set to 1,
- * the shell reads from a file from argv[1].
- */
-static int script_mode = 0;
 
 /*
  * Prints a prompt IF NOT in batch mode (see script_mode global flag),
