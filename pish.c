@@ -231,5 +231,5 @@ int main(int argc, char *argv[])
         fclose(fp);
 	return EXIT_SUCCESS;
     }
-    return;
+    return EXIT_SUCCESS;
 }
