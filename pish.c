@@ -53,7 +53,7 @@ void handle_history(struct pish_arg *arg){
      char line[1024];
      int count =1;
      while(fgets(line,sizeof(line),file)){
-          printf("%d %s", count++ , line);
+          printf("%d%s", count++ , line);
      }
      fclose(file);
 }
