@@ -13,6 +13,7 @@
 //     * the shell reads from a file from argv[1].
 static int script_mode = 0;
 
+//if not in batch mode, return 1
 int prompt(void){
     static const char prompt[] = {0xe2, 0x96, 0xb6, ' ', ' ', '\0'};
     if (!script_mode) {
@@ -21,14 +22,20 @@ int prompt(void){
     } return 1;
 }
 
+//handles the exit command, exit the shell if called with no argument
+//if extra arguments, prints a usage error
 void handle_exit(struct pish_arg *arg){
     if(arg->argc >1 ){
         usage_error();
 	return;
     }
-     exit(EXIT_SUCCESS);
+     exit(EXIT_SUCCESS);  //exit the shell 
 }
 
+//handles the cd command
+//change the curr working directory to the target path
+//chech the number of arg if is incorrect prints isage error
+//if the change directory fails prints error
 void handle_cd(struct pish_arg *arg){
      if(arg->argc != 2){
          usage_error();
@@ -40,13 +47,16 @@ void handle_cd(struct pish_arg *arg){
      }
 }
 
+//handles the history command
+//"r"and prints  command history from the file
+//if called with arg, print error
 void handle_history(struct pish_arg *arg){
      if(arg->argc != 1){
          usage_error();
 	 return;
      }
      FILE *file = fopen(pish_history_path, "r");
-     if(!file){
+     if(!file){          //check if file opening failed
          perror("open");
 	 return;
      }
@@ -55,21 +65,24 @@ void handle_history(struct pish_arg *arg){
      while(fgets(line,sizeof(line),file)){
           printf("%d%s", count++ , line);
      }
-     fclose(file);
+     fclose(file); //close file after "r"
 }
 
+//executes an external command by fork a child process
+//the child process replaces itself with the requested command using execvp()
+//if the fork or exec fails, print error
 void execute_external_command(struct pish_arg *arg){
      pid_t pid = fork();
-     if(pid < 0){
+     if(pid < 0){        //fork failed
          perror("fork");
 	 return;
      }
-     else if( pid == 0){
-         execvp(arg->argv[0],arg->argv);
-	 perror("pish");
-	 exit(EXIT_FAILURE);
+     else if( pid == 0){  //child process
+         execvp(arg->argv[0],arg->argv);   //replace the child process with the command
+	 perror("pish");                  //print error if execvp fails
+	 exit(EXIT_FAILURE);              //exit child process with FAILURE
      }
-     else{
+     else{       //parent process
      wait(NULL); //wait until the child finish the tasks
      }
 }
