@@ -229,6 +229,7 @@ int main(int argc, char *argv[])
      */  
     if(fp!=stdin){
         fclose(fp);
+	return EXIT_SUCCESS;
     }
-    return EXIT_SUCCESS;
+    return;
 }
