@@ -7,13 +7,12 @@
 
 #include "pish.h"
 
-static char pish_history_path[1024] = {'\0'};
+char pish_history_path[1024] = {'\0'};
 
 /*
  * Set history file path to ~/.pish_history.
  */
-static void set_history_path()
-{
+void set_history_path(){
     const char *home = getpwuid(getuid())->pw_dir;
     strncpy(pish_history_path, home, 1024);
     strcat(pish_history_path, "/.pish_history");

@@ -13,6 +13,14 @@
 //     * the shell reads from a file from argv[1].
 static int script_mode = 0;
 
+int prompt(void){
+    static const char prompt[] = {0xe2, 0x96, 0xb6, ' ', ' ', '\0'};
+    if (!script_mode) {
+	printf("%s", prompt);
+        fflush(stdout);
+    } return 1;
+}
+
 void handle_exit(struct pish_arg *arg){
     if(arg->argc >1 ){
         usage_error();
@@ -22,8 +30,9 @@ void handle_exit(struct pish_arg *arg){
 }
 
 void handle_cd(struct pish_arg *arg){
-     if(arg->argc!=2){
+     if(arg->argc != 2){
          usage_error();
+	 //fprintf(stderr,"pish: Usage error\n");
 	 return;
      }
      if(chdir(arg->argv[1])!=0){
@@ -32,11 +41,21 @@ void handle_cd(struct pish_arg *arg){
 }
 
 void handle_history(struct pish_arg *arg){
-     if(arg->argc>1){
+     if(arg->argc != 1){
          usage_error();
 	 return;
      }
-     print_history();
+     FILE *file = fopen(pish_history_path, "r");
+     if(!file){
+         perror("open");
+	 return;
+     }
+     char line[1024];
+     int count =1;
+     while(fgets(line,sizeof(line),file)){
+          printf("%d %s", count++ , line);
+     }
+     fclose(file);
 }
 
 void execute_external_command(struct pish_arg *arg){
@@ -58,7 +77,7 @@ void execute_external_command(struct pish_arg *arg){
 /*
  * Prints a prompt IF NOT in batch mode (see script_mode global flag),
  */ 
-int prompt(void)
+/*int prompt(void)
 {
     static const char prompt[] = {0xe2, 0x96, 0xb6, ' ', ' ', '\0'};
     if (!script_mode) {
@@ -66,7 +85,7 @@ int prompt(void)
         fflush(stdout);
     }
     return 1;
-}
+}*/
 
 /*
  * Print usage error for built-in commands.
@@ -157,12 +176,24 @@ int pish(FILE *fp)
 
      * The [TODO] is where you read a line from `fp` into `buf`.
      */
-    while(prompt()&& fgets(buf, sizeof(buf),fp)){
+    while(1){
+	if(fp==stdin){
+	prompt();
+	}
+
+	if( fgets(buf, sizeof(buf),fp)==NULL){
+		break;
+	}
         parse_command(buf, &arg);
         run(&arg);
     }
 
-    return 0;
+    if(fp!=stdin){
+    fclose(fp);
+    
+    }
+
+    exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char *argv[])
